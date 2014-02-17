@@ -1,0 +1,50 @@
+{ 
+	"name": "value", 
+	"version": "value", 
+	"title": "value", 
+	"description": "value", 
+	"protocol": "rest", 
+	"basePath": "value", 
+	"auth": { 
+		"key": { 
+			"param": "value", 
+			"location": "value", 
+			"secret": { 
+				"param": "value", 
+				"type": "value" 
+			} 
+		}, 
+
+		"basicAuth": "value", 
+ 
+		"oauth": { 
+			"version": "value", 
+			"base_uri": "value", 
+			"authorize_uri": "value", 
+			"access_token_uri": "value", 
+			"auth_flows": [ "value" ], 
+			"options": { } 
+		}
+	}, 
+	"resources": { 
+		"value": { 
+			"methods": { 
+				"value": { 
+					"path": "value", 
+					"httpMethod": "value", 
+					"description": "value", 
+					"parameters": { 
+						"value": { 
+							"description": "value", 
+							"default": "value", 
+							"required": "value", 
+							"enum": [ "value" ], 
+							"enumDescriptions": [ "value" ], 
+							"location": "value" 
+						} 
+					} 
+				} 
+			} 
+		} 
+	} 
+}
