@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
+﻿using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Description;
+using IODocsNet;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using SampleApi;
 using SampleApi.Areas.HelpPage;
@@ -20,10 +19,8 @@ namespace Tests.Unit
         [TestFixtureSetUp]
         public void When_generating_an_iodoc()
         {
-            IApiExplorer apiExplorer = ApiExplorer(@".\SampleApi.xml");
+            var apiExplorer = ApiExplorer(@".\SampleApi.xml");
             var jsonDoc = _ioDocGenerator.Generate(apiExplorer.ApiDescriptions);
-            Console.WriteLine(jsonDoc);
-
             _doc = JsonConvert.DeserializeObject(jsonDoc);
         }
 
@@ -41,9 +38,23 @@ namespace Tests.Unit
         }
 
         [Test]
-        public void It_should_describe_all_actions_on_a_resource()
+        public void It_should_describe_all_methods_on_a_resource()
         {
             Assert.IsNotNull(_doc.resources.Address.methods.Get);
+            Assert.IsNotNull(_doc.resources.Address.methods.Put);
+            Assert.IsNotNull(_doc.resources.Address.methods.Post);
+            Assert.IsNotNull(_doc.resources.Address.methods.Delete);
+        }
+
+        [Test]
+        public void It_should_describe_all_properties_of_a_method()
+        {
+            var method = _doc.resources.Customer.methods.Get;
+
+            Assert.IsNotNull(method);
+            Assert.AreEqual("api/Customer/{id}?magicNumber={magicNumber}", method.path.ToString());
+            Assert.AreEqual("GET", method.httpMethod.ToString());
+            Assert.AreEqual("Retrieve a customer by its id", method.description.ToString());
         }
 
         [Test]
@@ -54,11 +65,50 @@ namespace Tests.Unit
         }
 
         [Test]
-        public void It_should_include_the_xml_documentation()
+        public void It_should_describe_all_properties_of_a_parameter()
         {
-            const string expectedDescription = "Retrieve a customer by its id";
-            Assert.AreEqual(expectedDescription, _doc.resources.Customer.methods.Get.description.ToString());
+            var parameters = _doc.resources.Customer.methods.Get.parameters;
+
+            Assert.IsNotNull(parameters.id);
+            Assert.AreEqual("The customer's id", parameters.id.description.ToString());
+            Assert.AreEqual("0", parameters.id["default"].ToString());
+            Assert.AreEqual("true", parameters.id.required.ToString());
+            Assert.AreEqual("pathReplace", parameters.id.location.ToString());
         }
+
+        [Test]
+        public void It_should_not_describe_enum_properties_if_they_are_not_provided()
+        {
+            Assert.IsNull(_doc.resources.Customer.methods.Get.parameters.id.@enum);
+            Assert.IsNull(_doc.resources.Customer.methods.Get.parameters.id.enumDescriptions);
+        }
+
+        [Test]
+        public void It_should_describe_optional_parameters_as_not_required()
+        {
+            Assert.IsFalse(bool.Parse(_doc.resources.Customer.methods.Get.parameters.magicNumber.required.ToString()));
+        }
+
+        [Test]
+        public void It_should_describe_all_values_of_an_enum_parameter()
+        {
+            var parameters = _doc.resources.Customer.methods.Put.parameters.status;
+            var values = ((JArray)parameters.@enum).Select(s => s.ToString());
+
+            Assert.IsTrue(new[] { "Active", "Inactive", "Suspended", "Cancelled" }
+                .SequenceEqual(values));
+        }
+
+        [Test]
+        public void It_should_describe_all_descriptions_of_an_enum_parameter()
+        {
+            // Going to have to do for now. Not sure what ideal behavior should be.
+            var parameters = _doc.resources.Customer.methods.Put.parameters.status;
+            var descriptions = ((JArray)parameters.enumDescriptions).Select(s => s.ToString());
+
+            Assert.IsTrue(new[] { "Description for Active", "Description for Inactive", "Description for Suspended", "Description for Cancelled" }
+                .SequenceEqual(descriptions));
+        }   
 
         private IApiExplorer ApiExplorer(string documentationPath)
         {

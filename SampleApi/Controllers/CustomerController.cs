@@ -1,4 +1,5 @@
-﻿using System.Web.Http;
+﻿using System;
+using System.Web.Http;
 
 namespace SampleApi.Controllers
 {
@@ -17,8 +18,9 @@ namespace SampleApi.Controllers
         /// Retrieve a customer by its id
         /// </summary>
         /// <param name="id">The customer's id</param>
+        /// <param name="magicNumber">The customer's magic number</param>
         /// <returns>The requested customer</returns>
-        public string Get(int id)
+        public string Get(int id, int magicNumber = 42)
         {
             return "value";
         }
@@ -36,7 +38,8 @@ namespace SampleApi.Controllers
         /// </summary>
         /// <param name="id">The customer's id</param>
         /// <param name="value">The updated customer</param>
-        public void Put(int id, [FromBody]string value)
+        /// <param name="status">The status of the customer</param>
+        public void Put(int id, [FromBody]string value, Status status)
         {
         }
 

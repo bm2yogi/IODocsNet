@@ -432,11 +432,12 @@
             Api endpoints for Customers
             </summary>
         </member>
-        <member name="M:SampleApi.Controllers.CustomerController.Get(System.Int32)">
+        <member name="M:SampleApi.Controllers.CustomerController.Get(System.Int32,System.Int32)">
             <summary>
             Retrieve a customer by its id
             </summary>
             <param name="id">The customer's id</param>
+            <param name="magicNumber">The customer's magic number</param>
             <returns>The requested customer</returns>
         </member>
         <member name="M:SampleApi.Controllers.CustomerController.Post(System.String)">
@@ -445,12 +446,18 @@
             </summary>
             <param name="value">The new customer</param>
         </member>
-        <member name="M:SampleApi.Controllers.CustomerController.Put(System.Int32,System.String)">
+        <member name="M:SampleApi.Controllers.CustomerController.Put(System.Int32,System.String,SampleApi.Controllers.Status)">
             <summary>
             Update an existing Customer
             </summary>
             <param name="id">The customer's id</param>
             <param name="value">The updated customer</param>
+            <param name="status">The status of the customer</param>
+        </member>
+        <member name="T:SampleApi.Controllers.Status">
+            <summary>
+            Customer Status Values
+            </summary>
         </member>
     </members>
 </doc>
