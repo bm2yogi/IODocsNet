@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Collections.Generic;
 using System.Web.Http;
 
 namespace SampleApi.Controllers
@@ -8,11 +8,11 @@ namespace SampleApi.Controllers
     /// </summary>
     public class CustomerController : ApiController
     {
-        //// GET api/customer
-        //public IEnumerable<string> Get()
-        //{
-        //    return new string[] { "value1", "value2" };
-        //}
+        // GET api/customer
+        public IEnumerable<string> Get()
+        {
+            return new string[] { "value1", "value2" };
+        }
 
         /// <summary>
         /// Retrieve a customer by its id

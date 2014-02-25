@@ -42,7 +42,7 @@ namespace IODocsNet
             if (apiDescriptions.Any())
             {
                 apiDescriptions
-                    .GroupBy(d => d.ActionDescriptor.ControllerDescriptor.ControllerName)
+                    .GroupBy(ControllerName)
                     .ToDictionary(g => g.Key, g => g.Select(d => d))
                     .ToList()
                     .ForEach(c => resources.Add(c.Key, new { methods = Methods(c.Value) }));
@@ -51,15 +51,27 @@ namespace IODocsNet
             return resources;
         }
 
+        private static string ControllerName(ApiDescription d)
+        {
+            return d.ActionDescriptor.ControllerDescriptor.ControllerName;
+        }
+
         private static IDictionary<string, object> Methods(IEnumerable<ApiDescription> actionDescriptions)
         {
             var methods = NewExpandoObject();
 
             actionDescriptions.Distinct().ToList().ForEach(
-                d => methods.Add(d.ActionDescriptor.ActionName,
+                d => methods.Add(ActionName(d),
                     BuildMethod(d)));
 
             return methods;
+        }
+
+        private static string ActionName(ApiDescription d)
+        {
+            var actionName = d.ActionDescriptor.ActionName;
+            var args = string.Join(", ", d.ActionDescriptor.GetParameters().Select(p => p.ParameterName));
+            return string.Format("{0}({1})", actionName, args);
         }
 
         private static object BuildMethod(ApiDescription apiDescription)

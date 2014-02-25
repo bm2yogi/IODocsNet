@@ -1,4 +1,5 @@
-﻿using System.Web.Http;
+﻿using System.Collections.Generic;
+using System.Web.Http;
 
 namespace SampleApi.Controllers
 {
@@ -7,14 +8,14 @@ namespace SampleApi.Controllers
     /// </summary>
     public class AddressController : ApiController
     {
-        ///// <summary>
-        ///// Retrieve a list of all Addresses
-        ///// </summary>
-        ///// <returns>A list of all available Addresses</returns>
-        //public IEnumerable<string> Get()
-        //{
-        //    return new string[] { "value1", "value2" };
-        //}
+        /// <summary>
+        /// Retrieve a list of all Addresses
+        /// </summary>
+        /// <returns>A list of all available Addresses</returns>
+        public IEnumerable<string> Get()
+        {
+            return new string[] { "value1", "value2" };
+        }
 
         /// <summary>
         /// Retrieve an Address by its id

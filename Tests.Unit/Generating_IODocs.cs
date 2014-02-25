@@ -40,16 +40,26 @@ namespace Tests.Unit
         [Test]
         public void It_should_describe_all_methods_on_a_resource()
         {
-            Assert.IsNotNull(_doc.resources.Address.methods.Get);
-            Assert.IsNotNull(_doc.resources.Address.methods.Put);
-            Assert.IsNotNull(_doc.resources.Address.methods.Post);
-            Assert.IsNotNull(_doc.resources.Address.methods.Delete);
+            Assert.IsNotNull(_doc.resources.Address.methods["Get(id)"]);
+            Assert.IsNotNull(_doc.resources.Address.methods["Put(id, value)"]);
+            Assert.IsNotNull(_doc.resources.Address.methods["Post(value)"]);
+            Assert.IsNotNull(_doc.resources.Address.methods["Delete(id)"]);
+        }
+
+        [Test]
+        public void It_should_describe_overloaded_methods()
+        {
+            Assert.IsNotNull(_doc.resources.Address.methods["Get()"]);
+            Assert.IsNotNull(_doc.resources.Address.methods["Get(id)"]);
+
+            Assert.IsNotNull(_doc.resources.Customer.methods["Get()"]);
+            Assert.IsNotNull(_doc.resources.Customer.methods["Get(id, magicNumber)"]);
         }
 
         [Test]
         public void It_should_describe_all_properties_of_a_method()
         {
-            var method = _doc.resources.Customer.methods.Get;
+            var method = _doc.resources.Customer.methods["Get(id, magicNumber)"];
 
             Assert.IsNotNull(method);
             Assert.AreEqual("api/Customer/{id}?magicNumber={magicNumber}", method.path.ToString());
@@ -61,13 +71,13 @@ namespace Tests.Unit
         public void It_should_include_the_default_message_for_undocumented_methods()
         {
             const string expectedDescription = "No description provided for Customer.Delete";
-            Assert.AreEqual(expectedDescription, _doc.resources.Customer.methods.Delete.description.ToString());
+            Assert.AreEqual(expectedDescription, _doc.resources.Customer.methods["Delete(id)"].description.ToString());
         }
 
         [Test]
         public void It_should_describe_all_properties_of_a_parameter()
         {
-            var parameters = _doc.resources.Customer.methods.Get.parameters;
+            var parameters = _doc.resources.Customer.methods["Get(id, magicNumber)"].parameters;
 
             Assert.IsNotNull(parameters.id);
             Assert.AreEqual("The customer's id", parameters.id.description.ToString());
@@ -79,20 +89,20 @@ namespace Tests.Unit
         [Test]
         public void It_should_not_describe_enum_properties_if_they_are_not_provided()
         {
-            Assert.IsNull(_doc.resources.Customer.methods.Get.parameters.id.@enum);
-            Assert.IsNull(_doc.resources.Customer.methods.Get.parameters.id.enumDescriptions);
+            Assert.IsNull(_doc.resources.Customer.methods["Get(id, magicNumber)"].parameters.id.@enum);
+            Assert.IsNull(_doc.resources.Customer.methods["Get(id, magicNumber)"].parameters.id.enumDescriptions);
         }
 
         [Test]
         public void It_should_describe_optional_parameters_as_not_required()
         {
-            Assert.IsFalse(bool.Parse(_doc.resources.Customer.methods.Get.parameters.magicNumber.required.ToString()));
+            Assert.IsFalse(bool.Parse(_doc.resources.Customer.methods["Get(id, magicNumber)"].parameters.magicNumber.required.ToString()));
         }
 
         [Test]
         public void It_should_describe_all_values_of_an_enum_parameter()
         {
-            var parameters = _doc.resources.Customer.methods.Put.parameters.status;
+            var parameters = _doc.resources.Customer.methods["Put(id, value, status)"].parameters.status;
             var values = ((JArray)parameters.@enum).Select(s => s.ToString());
 
             Assert.IsTrue(new[] { "Active", "Inactive", "Suspended", "Cancelled" }
@@ -100,10 +110,11 @@ namespace Tests.Unit
         }
 
         [Test]
-        public void It_should_describe_all_descriptions_of_an_enum_parameter()
+        public void 
+            It_should_describe_all_descriptions_of_an_enum_parameter()
         {
             // Going to have to do for now. Not sure what ideal behavior should be.
-            var parameters = _doc.resources.Customer.methods.Put.parameters.status;
+            var parameters = _doc.resources.Customer.methods["Put(id, value, status)"].parameters.status;
             var descriptions = ((JArray)parameters.enumDescriptions).Select(s => s.ToString());
 
             Assert.IsTrue(new[] { "Description for Active", "Description for Inactive", "Description for Suspended", "Description for Cancelled" }
