@@ -14,15 +14,13 @@ namespace Tests.Unit
         [TestFixtureSetUp]
         public void When_generating_an_iodoc()
         {
-            var configSettings = IODocsConfiguration.Settings;
-
-            _ioDocGenerator = new IODocGenerator();
+            _ioDocGenerator = new IODocGenerator(new StubConfigSettings());
             var jsonDoc = _ioDocGenerator.Generate(new ApiDescription[] { });
             _doc = JsonConvert.DeserializeObject(jsonDoc);
         }
 
         [Test]
-        public void It_should_include_basic_Api_information()
+        public void It_should_include_basic_Api_information_from_configuration()
         {
             Assert.AreEqual("SampleApi", _doc.name.ToString());
             Assert.AreEqual("1.0.0", _doc.version.ToString());

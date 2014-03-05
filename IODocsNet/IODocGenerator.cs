@@ -10,11 +10,11 @@ namespace IODocsNet
 {
     public class IODocGenerator
     {
-        private readonly IODocsConfiguration _configSettings;
-
-        public IODocGenerator()
+        private readonly IConfigurationSettings _configSettings;
+        
+        public IODocGenerator(IConfigurationSettings configSettings)
         {
-            _configSettings = IODocsConfiguration.Settings;
+            _configSettings = configSettings;
         }
 
         public string Generate(IEnumerable<ApiDescription> apiDescriptions)
@@ -92,18 +92,32 @@ namespace IODocsNet
 
         private static string MethodDescription(ApiDescription apiDescription)
         {
-            return (String.IsNullOrEmpty(apiDescription.Documentation))
-                ? String.Format("No description provided for {0}.{1}",
-                    apiDescription.ActionDescriptor.ControllerDescriptor.ControllerName,
-                    apiDescription.ActionDescriptor.ActionName)
+            var httpActionDescriptor = apiDescription.ActionDescriptor;
+
+            return string.IsNullOrEmpty(apiDescription.Documentation)
+                ? string.Format("No description provided for {0}.{1}",
+                    httpActionDescriptor.ControllerDescriptor.ControllerName,
+                    httpActionDescriptor.ActionName)
                 : apiDescription.Documentation;
+        }
+
+        private static string ParameterDescription(ApiParameterDescription parameterDescription)
+        {
+            var httpActionDescriptor = parameterDescription.ParameterDescriptor.ActionDescriptor;
+
+            return string.IsNullOrEmpty(parameterDescription.Documentation)
+                ? String.Format("No description provided for \"{0}\" parameter of {1}.{2}",
+                    parameterDescription.Name,
+                    httpActionDescriptor.ControllerDescriptor.ControllerName,
+                    httpActionDescriptor.ActionName)
+                : parameterDescription.Documentation;
         }
 
         private static object BuildParameter(ApiParameterDescription p)
         {
             var parameter = NewExpandoObject();
 
-            parameter.Add("description", p.Documentation);
+            parameter.Add("description", ParameterDescription(p));
             parameter.Add("default", DefaultValue(p));
             parameter.Add("location", ParameterLocation(p));
             parameter.Add("required", IsRequired(p));
@@ -124,7 +138,7 @@ namespace IODocsNet
         private static object EnumDescriptions(ApiParameterDescription parameterDescription)
         {
             return Enum.GetNames(parameterDescription.ParameterDescriptor.ParameterType)
-                .Select(v => string.Format(CultureInfo.InvariantCulture, "Description for {0}", v));
+                .Select(v=>v.ToString(CultureInfo.InvariantCulture));
         }
 
         private static object EnumValues(ApiParameterDescription parameterDescription)

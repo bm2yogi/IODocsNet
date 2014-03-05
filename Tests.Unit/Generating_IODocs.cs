@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Web.Http;
 using System.Web.Http.Description;
 using IODocsNet;
@@ -14,13 +15,13 @@ namespace Tests.Unit
     public class GeneratingIoDocs
     {
         private dynamic _doc;
-        private readonly IODocGenerator _ioDocGenerator = new IODocGenerator();
+        private readonly IODocGenerator _ioDocGenerator = new IODocGenerator(new StubConfigSettings());
 
         [TestFixtureSetUp]
         public void When_generating_an_iodoc()
         {
-            var apiExplorer = ApiExplorer(@".\SampleApi.xml");
-            var jsonDoc = _ioDocGenerator.Generate(apiExplorer.ApiDescriptions);
+            var apiDescriptions = GetApiDescriptions();
+            var jsonDoc = _ioDocGenerator.Generate(apiDescriptions);
             _doc = JsonConvert.DeserializeObject(jsonDoc);
         }
 
@@ -75,6 +76,13 @@ namespace Tests.Unit
         }
 
         [Test]
+        public void It_should_include_the_default_message_for_undocumented_parameters()
+        {
+            const string expectedDescription = "No description provided for \"id\" parameter of Customer.Delete";
+            Assert.AreEqual(expectedDescription, _doc.resources.Customer.methods["Delete(id)"].parameters.id.description.ToString());
+        }
+
+        [Test]
         public void It_should_describe_all_properties_of_a_parameter()
         {
             var parameters = _doc.resources.Customer.methods["Get(id, magicNumber)"].parameters;
@@ -113,23 +121,22 @@ namespace Tests.Unit
         public void 
             It_should_describe_all_descriptions_of_an_enum_parameter()
         {
-            // Going to have to do for now. Not sure what ideal behavior should be.
+            // Going to have to do for now. Not sure what ideal behavior should be or how to read xml documentation from enum members.
             var parameters = _doc.resources.Customer.methods["Put(id, value, status)"].parameters.status;
             var descriptions = ((JArray)parameters.enumDescriptions).Select(s => s.ToString());
 
-            Assert.IsTrue(new[] { "Description for Active", "Description for Inactive", "Description for Suspended", "Description for Cancelled" }
-                .SequenceEqual(descriptions));
-        }   
+            Assert.IsTrue(new[] { "Active", "Inactive", "Suspended", "Cancelled" }
+            .SequenceEqual(descriptions));
+        }
 
-        private IApiExplorer ApiExplorer(string documentationPath)
+        private IEnumerable<ApiDescription> GetApiDescriptions()
         {
             var httpConfiguration = new HttpConfiguration();
             httpConfiguration.SetDocumentationProvider(
-                new XmlDocumentationProvider(documentationPath));
+                new XmlDocumentationProvider(@".\SampleApi.xml"));
 
             WebApiConfig.Register(httpConfiguration);
-
-            return new ApiExplorer(httpConfiguration);
+            return ((IApiExplorer) new ApiExplorer(httpConfiguration)).ApiDescriptions;
         }
     }
 }

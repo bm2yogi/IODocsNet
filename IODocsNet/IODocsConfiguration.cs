@@ -2,7 +2,17 @@ using System.Configuration;
 
 namespace IODocsNet
 {
-    public class IODocsConfiguration : ConfigurationSection
+    public interface IConfigurationSettings
+    {
+        string Name { get; }
+        string ApiVersion { get; }
+        string Title { get; }
+        string Description { get; }
+        string BasePath { get; }
+        string Protocol { get; }
+    }
+
+    public class IODocsConfiguration : ConfigurationSection, IConfigurationSettings
     {
         private const string SectionName = "ioDocs";
         private const string ApiNameKey = "name";
